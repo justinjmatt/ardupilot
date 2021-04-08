@@ -229,7 +229,7 @@ void Plane::dspoiler_update(void)
 
 	//// Modified 4/8/2021: Add weight to outer surface during rudder to prevent roll ////
 	int16_t weight_outer = g2.crow_flap_weight_outer.get();
-	rudder_outer_mod = rudder*weight_outer*0.01f;
+	float rudder_outer_mod = rudder*weight_outer*0.01f;
 	//////////////////////////// end modification ////////////////////////////////////////
 	
     if (rudder > 0) {
