@@ -229,9 +229,14 @@ void Plane::dspoiler_update(void)
 
 	//// Modified 4/8/2021: Add weight to outer surface during rudder to prevent roll ////
 	int16_t weight_outer = g2.crow_flap_weight_outer.get();
+<<<<<<< HEAD
 	float rudder_outer_mod = rudder*weight_outer*0.01f;
+=======
+	dspoiler_outer_right = dspoiler_outer_right*weight_outer*0.01f;
+	dspoiler_outer_left = dspoiler_outer_left*weight_outer*0.01f;
+>>>>>>> Added weight param for d spoiler outer surface during rudder
 	//////////////////////////// end modification ////////////////////////////////////////
-	
+
     if (rudder > 0) {
         // apply rudder to right wing
         dspoiler_outer_right = constrain_float(dspoiler_outer_right + rudder_outer_mod, -4500, 4500);
