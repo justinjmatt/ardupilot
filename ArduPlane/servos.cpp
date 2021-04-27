@@ -362,13 +362,36 @@ void Plane::set_servos_idle(void)
  */
 void Plane::set_servos_manual_passthrough(void)
 {
-    SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
-    SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
-    SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
+	// Modified 4/27/2021 - Justin Matt - Add system ID sweep support //////////////////
+	if (plane.sweep_active) {
+		if (plane.sweep_axis == 1) {
+		    // do aileron sweep
+		    SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, plane.u_sweep + channel_roll->get_control_in_zero_dz());
+			SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
+			SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
+		}
+		else if (plane.sweep_axis == 2) {
+			// do elevator sweep
+		    SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
+			SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, plane.u_sweep + channel_pitch->get_control_in_zero_dz());
+			SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
+		}
+		else if (plane.sweep_axis == 3) {
+			// do rudder sweep
+		    SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
+			SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
+			SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, plane.u_sweep + channel_rudder->get_control_in_zero_dz());
+		}
+	} else {
+	// set servos normally - end of modifications //////////////////////
+        SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
+        SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
+        SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
+	}
     int8_t throttle = get_throttle_input(true);
     SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, throttle);
-
-    if (quadplane.available() && (quadplane.options & QuadPlane::OPTION_IDLE_GOV_MANUAL)) {
+    
+	if (quadplane.available() && (quadplane.options & QuadPlane::OPTION_IDLE_GOV_MANUAL)) {
         // for quadplanes it can be useful to run the idle governor in MANUAL mode
         // as it prevents the VTOL motors from running
         int8_t min_throttle = aparm.throttle_min.get();
@@ -378,6 +401,14 @@ void Plane::set_servos_manual_passthrough(void)
         throttle = MAX(throttle, min_throttle);
         SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, throttle);
     }
+	
+	AP::logger().Write("SYID", "TimeUS,sweep_axis,sweep,da,de,dr", "Qbfhhh",
+					AP_HAL::micros64(),
+					plane.sweep_axis,
+					plane.u_sweep,
+					plane.channel_roll->get_control_in_zero_dz(),
+					plane.channel_pitch->get_control_in_zero_dz(),
+					plane.channel_rudder->get_control_in_zero_dz());
 }
 
 /*

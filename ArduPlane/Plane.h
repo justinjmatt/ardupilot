@@ -216,6 +216,37 @@ private:
     // Training mode
     bool training_manual_roll;  // user has manual roll control
     bool training_manual_pitch; // user has manual pitch control
+	
+	// Training mode modifications for system ID - Modifed 4/27/2021 - Justin Matt ////////
+	// Get sweep parameters
+	int8_t sweep_axis  = g2.sysid_axis.get();
+	bool   sweep_auto  = g2.sysid_type.get();
+	float  amp         = g2.sysid_amp.get();
+	bool   sweep_att_hold = g2.sysid_att_hold.get();
+	float  f_min_hz    = 0.5f;
+	float  f_max_hz    = 4.0f;
+	bool   f_const     = true;
+	float  t_rec       = 20.0f*1000.0f;
+	float  t_fadein    = 2.0f*1000.0f;
+	float  t_fadeout   = 0;
+	bool   white_noise = true;
+	
+	// Declare other variables 
+	bool do_sweep;
+	uint64_t t_start;
+	bool sweep_active;
+	uint64_t t_in_mode;
+	uint64_t t_sweep;
+	float k_sweep;
+	uint64_t t_sweep_end;
+	float omega_rps;
+	float theta_sweep;
+	uint64_t sweep_time_step;
+	float u_sweep;
+	uint64_t t0_sweep;
+	uint64_t t_current;
+	uint64_t t_last;
+	/////////////// End of Modifications /////////////////////////////////////////////
 
     /*
       keep steering and rudder control separated until we update servos,
