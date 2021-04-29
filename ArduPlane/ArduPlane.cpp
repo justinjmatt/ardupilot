@@ -1144,7 +1144,8 @@ void Plane::update_control_mode(void)
 
 ///// Modified 4/23/2021 - Justin Matt - System ID implemented into training mode //////
     if (control_mode != &mode_training) {
-		t_in_mode = 0;
+		plane.t0_sweep = 0;
+		plane.sweep_active = false;
 	}
 ////////////////////////////////////////////////////////////////////////////////////////
 

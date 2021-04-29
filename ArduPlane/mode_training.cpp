@@ -5,13 +5,18 @@ void ModeTraining::update()
 {
 ////////// Modified 4/22/2021 - Justin Matt //////////
 
-	// Plane should be in manual control
-	plane.training_manual_roll = true;
-    plane.nav_roll_cd = 0;
-	plane.training_manual_pitch = true;
-	plane.nav_pitch_cd = 0;
+	// Get parameters
+	plane.sweep_axis  = plane.g2.jsysid_axis;
+	plane.sweep_type  = plane.g2.jsysid_type;
+	plane.sweep_amp   = 0.01f*plane.g2.jsysid_amp;
+	plane.t_rec       = 1000.0*plane.g2.jsysid_t_rec;
+	plane.f_min_hz    = plane.g2.jsysid_f_min_hz;
+	plane.f_max_hz    = plane.g2.jsysid_f_max_hz;
+	plane.t_fadein    = plane.g2.jsysid_t_fadein;
 	
 	if (plane.sweep_axis == 0) {
+		plane.do_sweep = false;
+	} else if (plane.sweep_type == 0) {
 		plane.do_sweep = false;
 	} else {
 		plane.do_sweep = true; 
@@ -20,63 +25,66 @@ void ModeTraining::update()
 	// Get constant minimum frequency time
 	if (plane.f_const) {
 		plane.t_start = 1000/plane.f_min_hz; // ms
-		plane.t_sweep_end = plane.t_rec - plane.t_start;
+		plane.t_sweep_end = plane.t_rec - plane.t_start; // ms
 	} else {
 			plane.t_start = 0;
 			plane.t_sweep_end = plane.t_rec;
 	}
 	
 	// Get time variables
-	if (plane.t_in_mode == 0) {
+	if (plane.t0_sweep == 0) {
 		// Set t0 to current time
 		plane.t0_sweep = millis();
+		plane.t_last = millis();
 		plane.theta_sweep = 0;
-		plane.t_last = 0;
 	}
 	
 	plane.t_in_mode = millis() - plane.t0_sweep;
 	plane.t_current = millis();
 	plane.sweep_time_step = plane.t_current - plane.t_last;
 	plane.t_last = plane.t_current;
-		
-	
+
 	// Main sweep code
 	if (plane.t_in_mode < plane.t_rec && plane.do_sweep == true) {
+		
+		// Plane should be in manual control
+		plane.training_manual_roll = true;
+		plane.nav_roll_cd = 0;
+		plane.training_manual_pitch = true;
+		plane.nav_pitch_cd = 0;
+
 		plane.sweep_active = true;
 		if (plane.t_in_mode < plane.t_start) {
 			plane.t_sweep = 0;
 			plane.k_sweep = 0;
 		} else {
 			plane.t_sweep = plane.t_in_mode - plane.t_start;
-			plane.k_sweep = 0.0187*(expf(4.0*(plane.t_sweep*0.001f)/plane.t_sweep_end)-1.0);
+			plane.k_sweep = 0.0187*(expf(4.0*plane.t_sweep/plane.t_sweep_end)-1.0);
 		}
 		plane.omega_rps = (plane.f_min_hz + plane.k_sweep*(plane.f_max_hz - plane.f_min_hz))*2*3.14159;
-		plane.theta_sweep += plane.omega_rps*plane.sweep_time_step*1000.0f; // rad
-		plane.u_sweep = sinf(plane.theta_sweep);
+		plane.theta_sweep += plane.omega_rps*plane.sweep_time_step*0.001f; // rad
+		plane.u_sweep = 4500*plane.sweep_amp*sinf(plane.theta_sweep); // deci-pwm
 		if (plane.t_in_mode < plane.t_fadein) {
 			plane.u_sweep = plane.u_sweep*plane.t_in_mode/plane.t_fadein;
 		}
 		if (plane.t_in_mode > plane.t_rec - plane.t_fadeout) {
 			plane.u_sweep = plane.u_sweep*(plane.t_rec - plane.t_in_mode)/plane.t_fadeout;
 		}
-		
-		// Hold attitude of decoupled axis
-		if (plane.sweep_att_hold == true) {
-			if (plane.sweep_axis == 1 || plane.sweep_axis == 3) {
-				// Hold pitch at zero when doing roll or yaw sweeps.
-				plane.training_manual_pitch = false;
-				plane.nav_pitch_cd = 0; 
-			}
-			if (plane.sweep_axis == 2) {
-				// Hold roll at zero when doing pitch sweeps.
-				plane.training_manual_roll = false;
-				plane.nav_roll_cd = 0; 
-			}
-		}
 	}
-    else { // If sweep isn't active, behave normally. 
+    else if (plane.sweep_type == 0) {
+		// set up controls for manual sweep
+		plane.sweep_active = true;
+		plane.u_sweep = 0;
+		// Plane should be in manual control
+		plane.training_manual_roll = true;
+		plane.nav_roll_cd = 0;
+		plane.training_manual_pitch = true;
+		plane.nav_pitch_cd = 0;
+	}
+	else { // If sweep isn't active, behave normally. 
 	    plane.sweep_active = false; // End of modifications.
-	
+		plane.u_sweep = 0;
+		
 		plane.training_manual_roll = false;
 		plane.training_manual_pitch = false;
 		plane.update_load_factor();

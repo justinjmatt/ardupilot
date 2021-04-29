@@ -577,17 +577,13 @@ public:
     AP_Int16        rtl_climb_min;
 	
 	// Modified 4/22/2021 - Justin Matt - Added parameters for system ID
-	AP_Int8    sysid_axis;
-	AP_Int8    sysid_type;
-	AP_Float   sysid_amp;
-	AP_Int8    sysid_att_hold;
-	// AP_Float   sysid_f_min_hz;
-	// AP_Float   sysid_f_max_hz;
-	// AP_Int8    sysid_f_const;
-	// AP_Int8    sysid_t_rec;
-	// AP_Float   sysid_t_fadein;
-	// AP_Float   sysid_t_fadeout;
-	// AP_Int8    sysid_white;
+	AP_Int8    jsysid_axis;
+	AP_Int8    jsysid_type;
+	AP_Float   jsysid_amp;
+	AP_Float   jsysid_f_min_hz;
+	AP_Float   jsysid_f_max_hz;
+	AP_Int8    jsysid_t_rec;
+	AP_Float   jsysid_t_fadein;
 };
 
 extern const AP_Param::Info var_info[];
