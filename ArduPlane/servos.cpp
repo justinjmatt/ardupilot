@@ -227,21 +227,17 @@ void Plane::dspoiler_update(void)
         dspoiler_inner_right = elevon_right;
     }
 
-	//// Modified 4/8/2021: Add weight to outer surface during rudder to prevent roll ////
-	int16_t weight_outer = g2.crow_flap_weight_outer.get();
-	float rudder_outer_mod = rudder*weight_outer*0.01f;
-	dspoiler_outer_right = dspoiler_outer_right*weight_outer*0.01f;
-	dspoiler_outer_left = dspoiler_outer_left*weight_outer*0.01f;
-	rudder_outer_mod = rudder*weight_outer*0.01f;
-	//////////////////////////// end modification ////////////////////////////////////////
 
+	int16_t weight_outer = g2.crow_flap_weight_outer.get();
+
+	//// Modified 4/8/2021: Add weight to outer surface during rudder to prevent roll ////
     if (rudder > 0) {
         // apply rudder to right wing
-        dspoiler_outer_right = constrain_float(dspoiler_outer_right + rudder_outer_mod, -4500, 4500);
+        dspoiler_outer_right = constrain_float(dspoiler_outer_right + rudder*weight_outer*0.01f, -4500, 4500);
         dspoiler_inner_right = constrain_float(dspoiler_inner_right - rudder, -4500, 4500);
     } else {
         // apply rudder to left wing
-        dspoiler_outer_left = constrain_float(dspoiler_outer_left - rudder_outer_mod, -4500, 4500);
+        dspoiler_outer_left = constrain_float(dspoiler_outer_left - rudder*weight_outer*0.01f, -4500, 4500);
         dspoiler_inner_left = constrain_float(dspoiler_inner_left + rudder, -4500, 4500);
     }
 
