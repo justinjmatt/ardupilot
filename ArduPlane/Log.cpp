@@ -287,6 +287,20 @@ struct PACKED log_CMDI {
     uint8_t F;
 };
 
+///////////// Modified 4/29/2021 - Justin Matt //////////////////////
+// Add system ID log
+struct PACKED log_system_id {
+	LOG_PACKET_HEADER;
+	uint64_t TimeUS;
+	int8_t swp_act;
+	float u;
+	float da;
+	float de;
+	float dr;
+};
+///////////////////////////////////////////////
+
+
 // type and unit information can be found in
 // libraries/AP_Logger/Logstructure.h; search for "log_Units" for
 // units and "Format characters" for field type information
@@ -472,8 +486,38 @@ const struct LogStructure Plane::log_structure[] = {
     { LOG_CMDH_MSG, sizeof(log_CMDI),     
       "CMDH", "QHBBBBffffiifB",    "TimeUS,CId,TSys,TCmp,cur,cont,Prm1,Prm2,Prm3,Prm4,Lat,Lng,Alt,F", "s---------DUm-", "F---------GGB-" }, 
 
+
+/////////////////// Modified 4/29/2021 - Justin Matt //////////////////////
+
+// @LoggerMessage: SSID
+// @Description: System ID Modification logging
+// @Field: TimeUS: Time since system startup
+// @Field: swp_act: sweep active
+// @Field: u: auto sweep input
+// @Field: da: aileron command
+// @Field: de: elevator command
+// @Field: dr: rudder command
+	{ LOG_SSID_MSG, sizeof(log_system_id),
+	"SSID", "Qbffff", "TimeUS,swp_act,u,da,de,dr", "s-YYYY", "F-1111" },	
 };
 
+
+//////////// Modified 4/29/2021 - Justin Matt //////////////////////
+
+// Write System ID log packet
+void Plane::Log_Write_SSID()
+{
+    struct log_system_id pkt = {
+        LOG_PACKET_HEADER_INIT(LOG_SSID_MSG),
+        TimeUS  : AP_HAL::micros64(),
+        swp_act : int8_t(plane.sweep_active),
+		u       : plane.u_sweep,
+		da      : plane.sweep_roll_input,
+		de      : plane.sweep_pitch_input,
+		dr      : plane.sweep_yaw_input,
+    };
+    logger.WriteBlock(&pkt, sizeof(pkt));
+}
 
 // Write a COMMAND INT packet.
 void Plane::Log_Write_MavCmdI(const mavlink_command_int_t &mav_cmd)

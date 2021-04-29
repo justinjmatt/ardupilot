@@ -364,30 +364,64 @@ void Plane::set_servos_manual_passthrough(void)
 {
 	// Modified 4/27/2021 - Justin Matt - Add system ID sweep support //////////////////
 	if (plane.sweep_active) {
-		if (plane.sweep_axis == 1) {
-		    // do aileron sweep
-		    SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, plane.u_sweep + channel_roll->get_control_in_zero_dz());
-			SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
-			SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
+		if (plane.sweep_type == 1) {
+			// do automated sweeps
+			if (plane.sweep_axis == 1) {
+				// do aileron sweep
+				plane.sweep_roll_input = plane.u_sweep + channel_roll->get_control_in_zero_dz();
+				SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, plane.sweep_roll_input);
+				SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
+				SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
+			}
+			else if (plane.sweep_axis == 2) {
+				// do elevator sweep
+				plane.sweep_pitch_input = plane.u_sweep + channel_pitch->get_control_in_zero_dz();
+				SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
+				SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, plane.sweep_pitch_input);
+				SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
+			}
+			else if (plane.sweep_axis == 3) {
+				// do rudder sweep
+				plane.sweep_yaw_input = plane.u_sweep + channel_rudder->get_control_in_zero_dz();
+				SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
+				SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
+				SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, plane.sweep_yaw_input);
+			}
+		} else {
+			// do manual sweeps
+			if (plane.sweep_axis == 1) {
+				// do aileron sweep
+				plane.sweep_roll_input = plane.sweep_amp*channel_roll->get_control_in_zero_dz();
+				SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, plane.sweep_roll_input);
+				SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
+				SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
+			}
+			else if (plane.sweep_axis == 2) {
+				// do elevator sweep
+				plane.sweep_pitch_input = plane.sweep_amp*channel_pitch->get_control_in_zero_dz();
+				SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
+				SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, plane.sweep_pitch_input);
+				SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
+			}
+			else if (plane.sweep_axis == 3) {
+				// do rudder sweep
+				plane.sweep_yaw_input = plane.sweep_amp*channel_rudder->get_control_in_zero_dz();
+				SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
+				SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
+				SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, plane.sweep_yaw_input);
+			}
 		}
-		else if (plane.sweep_axis == 2) {
-			// do elevator sweep
-		    SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
-			SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, plane.u_sweep + channel_pitch->get_control_in_zero_dz());
-			SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
-		}
-		else if (plane.sweep_axis == 3) {
-			// do rudder sweep
-		    SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
-			SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
-			SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, plane.u_sweep + channel_rudder->get_control_in_zero_dz());
-		}
-	} else {
-	// set servos normally - end of modifications //////////////////////
-        SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
-        SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
-        SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
+	} 
+	else {
+		// set servos normally 
+		plane.sweep_roll_input = channel_roll->get_control_in_zero_dz();
+		plane.sweep_pitch_input = channel_pitch->get_control_in_zero_dz();
+		plane.sweep_yaw_input = channel_rudder->get_control_in_zero_dz();
+        SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, plane.sweep_roll_input);
+        SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, plane.sweep_pitch_input);
+        SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, plane.sweep_yaw_input);
 	}
+	//////////// end of modifications //////////////////////
     int8_t throttle = get_throttle_input(true);
     SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, throttle);
     
@@ -402,13 +436,9 @@ void Plane::set_servos_manual_passthrough(void)
         SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, throttle);
     }
 	
-	AP::logger().Write("SYID", "TimeUS,sweep_axis,sweep,da,de,dr", "Qbfhhh",
-					AP_HAL::micros64(),
-					plane.sweep_axis,
-					plane.u_sweep,
-					plane.channel_roll->get_control_in_zero_dz(),
-					plane.channel_pitch->get_control_in_zero_dz(),
-					plane.channel_rudder->get_control_in_zero_dz());
+	////////////////// Modifed 4/29/21 - Justin Matt ////////////
+	Log_Write_SSID();
+	// Modified logger
 }
 
 /*
@@ -855,7 +885,8 @@ void Plane::set_servos(void)
     SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, steering_control.rudder);
     SRV_Channels::set_output_scaled(SRV_Channel::k_steering, steering_control.steering);
 
-    if (control_mode == &mode_manual) {
+ //   if (control_mode == &mode_manual || sweep_active) {
+	 if (control_mode == &mode_manual || plane.sweep_active) {
         set_servos_manual_passthrough();
     } else {
         set_servos_controlled();

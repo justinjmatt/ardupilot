@@ -1232,41 +1232,63 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("RTL_CLIMB_MIN", 27, ParametersG2, rtl_climb_min, 0),
 
-/////// Modified 4/22/2021 - Justin Matt - Added System ID Parameters /////////
-
-    // @Param: SYSID_AXIS
+    // @Param: jSYSID_AXIS
     // @DisplayName: System Identification Axis
     // @Description: Controls which axis is being excited. Zero disables the system ID code that replaced training mode.
     // @Range: 0 3
     // @Increment: 1
     // @User: Standard
 	// @Values: 0:Disabled, 1:Roll, 2:Pitch, 3:Yaw
-    AP_GROUPINFO("SYSID_AXIS", 28, ParametersG2, sysid_axis, 0),
+    AP_GROUPINFO("jSYSID_AXIS", 29, ParametersG2, jsysid_axis, 0),
 
-    // @Param: SYSID_TYPE
+    // @Param: jSYSID_TYPE
     // @DisplayName: System Identification Sweep Type
     // @Description: Switches between manually piloted frequency sweeps and automated frequency sweeps.
     // @Range: 0 1
     // @Increment: 1
     // @User: Standard
 	// @Values: 0:Manual, 1:Automated
-    AP_GROUPINFO("SYSID_TYPE", 29, ParametersG2, sysid_type, 1),
+    AP_GROUPINFO("jSYSID_TYPE", 30, ParametersG2, jsysid_type, 1),
 	
-    // @Param: SYSID_AMP
+    // @Param: jSYSID_AMP
     // @DisplayName: System Identification Sweep Amplitude
     // @Description: Amplitude of the automated frequency sweeps or maximum amplitude of the RC stick input for manual sweeps. Defined as a percentage of the maximum servo throw.
-    // @Range: 0 100
+    // @Units: %
+	// @Range: 0 100
     // @User: Standard
-    AP_GROUPINFO("SYSID_AMP", 30, ParametersG2, sysid_amp, 10),	
+    AP_GROUPINFO("jSYSID_AMP", 31, ParametersG2, jsysid_amp, 10),	
 	
-    // @Param: SYSID_ATT_HOLD
-    // @DisplayName: System Identification Off-Axis Attitude Hold
-    // @Description: Choose whether to use feedback to hold the roll/pitch at zero when doing sweeps of a decoupled axis.
-    // @Range: 0 1
-	// Values: 0: All open-loop, 1: Closed-loop off-axis
+    // @Param: jSYSID_T_REC
+    // @DisplayName: System Identification Record Time
+    // @Description: Total length of frequency sweep.
+    // @Units: s
+	// @Range: 0 255
     // @User: Standard
-    AP_GROUPINFO("SYSID_ATT_HOLD", 31, ParametersG2, sysid_att_hold, 0),
-///////////////////////////////////////////////////////////////////////////////
+    AP_GROUPINFO("jSYSID_T_REC", 32, ParametersG2, jsysid_t_rec, 20),	
+	
+    // @Param: jSYSID_F_MIN_HZ
+    // @DisplayName: System Identification Minimum Frequency
+    // @Description: Minimum frequency of frequency sweep.
+    // @Units: Hz
+	// @Range: 0 50
+    // @User: Standard
+    AP_GROUPINFO("jSYSID_F_MIN_HZ", 33, ParametersG2, jsysid_f_min_hz, 0.5),	
+	
+    // @Param: jSYSID_F_MAX_HZ
+    // @DisplayName: System Identification Maximum Frequency
+    // @Description: System Identification Maximum Frequency.
+    // @Units: Hz
+	// @Range: 0 50
+    // @User: Standard
+    AP_GROUPINFO("jSYSID_F_MAX_HZ", 34, ParametersG2, jsysid_f_max_hz, 5),	
+
+    // @Param: jSYSID_T_FADEIN	
+    // @DisplayName: System Identification Fade-in Time
+    // @Description: Length of fade-in to maximum amplitude during frequency sweep.
+    // @Units: Hz
+	// @Range: 0 50
+    // @User: Standard
+    AP_GROUPINFO("jSYSID_T_FADEIN", 35, ParametersG2, jsysid_t_fadein, 2),	
 
 
 #if OFFBOARD_GUIDED == ENABLED

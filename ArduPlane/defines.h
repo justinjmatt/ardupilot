@@ -97,6 +97,8 @@ enum log_messages {
     LOG_CMDA_MSG,
     LOG_CMDS_MSG,
     LOG_CMDH_MSG,
+	// add system ID log - Modified 4/29/2021 - Justin Matt
+	LOG_SSID_MSG,
 };
 
 #define MASK_LOG_ATTITUDE_FAST          (1<<0)

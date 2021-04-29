@@ -219,16 +219,15 @@ private:
 	
 	// Training mode modifications for system ID - Modifed 4/27/2021 - Justin Matt ////////
 	// Get sweep parameters
-	int8_t sweep_axis  = g2.sysid_axis.get();
-	bool   sweep_auto  = g2.sysid_type.get();
-	float  amp         = g2.sysid_amp.get();
-	bool   sweep_att_hold = g2.sysid_att_hold.get();
-	float  f_min_hz    = 0.5f;
-	float  f_max_hz    = 4.0f;
+	int8_t sweep_axis;
+	int8_t sweep_type;
+	float  sweep_amp;
+	float  f_min_hz;
+	float  f_max_hz;
 	bool   f_const     = true;
-	float  t_rec       = 20.0f*1000.0f;
-	float  t_fadein    = 2.0f*1000.0f;
-	float  t_fadeout   = 0;
+	float  t_rec;
+	float  t_fadein    = (1/f_min_hz)*1000.0f;	 
+	float  t_fadeout   = 0; 			
 	bool   white_noise = true;
 	
 	// Declare other variables 
@@ -246,6 +245,11 @@ private:
 	uint64_t t0_sweep;
 	uint64_t t_current;
 	uint64_t t_last;
+	
+	// Logging variables for stick input
+	float sweep_roll_input;
+	float sweep_pitch_input;
+	float sweep_yaw_input;
 	/////////////// End of Modifications /////////////////////////////////////////////
 
     /*
@@ -898,6 +902,7 @@ private:
     void Log_Write_Nav_Tuning();
     void Log_Write_Status();
     void Log_Write_RC(void);
+	void Log_Write_SSID();
     void Log_Write_Vehicle_Startup_Messages();
     void Log_Write_AOA_SSA();
     void Log_Write_AETR();
