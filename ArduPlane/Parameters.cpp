@@ -1145,7 +1145,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
 
     // @Param: DSPOILER_CROW_W1
     // @DisplayName: Differential spoiler crow flaps outer weight
-    // @Description: This is amount of deflection applied to the two outer surfaces for differential spoilers for flaps to give crow flaps. It is a number from 0 to 100. At zero no crow flaps are applied. A recommended starting value is 25.
+    // @Description: MODIFIED: This specifies the percentage of deflection of the outer surface during rudder maneuvers. 
     // @Range: 0 100
     // @Units: %
     // @Increment: 1
@@ -1288,7 +1288,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Units: Hz
 	// @Range: 0 50
     // @User: Standard
-    AP_GROUPINFO("jSYSID_T_FADEIN", 35, ParametersG2, jsysid_t_fadein, 2),	
+    AP_GROUPINFO("jSYSID_T_FADEIN", 35, ParametersG2, jsysid_t_fadein, 2),
 
 
 #if OFFBOARD_GUIDED == ENABLED

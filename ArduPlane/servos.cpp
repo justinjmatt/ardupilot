@@ -227,15 +227,20 @@ void Plane::dspoiler_update(void)
         dspoiler_inner_right = elevon_right;
     }
 
+	// Modified 4/29/21 - Add weight to outer surface to prevent roll during rudder input ///////////
+	int16_t weight_outer = g2.crow_flap_weight_outer.get();
+
+	// add modded rudder term 
     if (rudder > 0) {
         // apply rudder to right wing
-        dspoiler_outer_right = constrain_float(dspoiler_outer_right + rudder, -4500, 4500);
+        dspoiler_outer_right = constrain_float(dspoiler_outer_right + rudder*weight_outer*0.01f, -4500, 4500);
         dspoiler_inner_right = constrain_float(dspoiler_inner_right - rudder, -4500, 4500);
     } else {
         // apply rudder to left wing
-        dspoiler_outer_left = constrain_float(dspoiler_outer_left - rudder, -4500, 4500);
+        dspoiler_outer_left = constrain_float(dspoiler_outer_left - rudder*weight_outer*0.01f, -4500, 4500);
         dspoiler_inner_left = constrain_float(dspoiler_inner_left + rudder, -4500, 4500);
     }
+	/////////////////////// end modifications ///////////////////
 
     // limit flap throw used for aileron
     const int8_t aileron_matching = g2.crow_flap_aileron_matching.get();
@@ -250,7 +255,8 @@ void Plane::dspoiler_update(void)
         }
     }
 
-    int16_t weight_outer = g2.crow_flap_weight_outer.get();
+	///////////// Modified - moved up the code (line 230) ////////////////
+    // int16_t weight_outer = g2.crow_flap_weight_outer.get();
     if (crow_mode == Plane::CrowMode::CROW_DISABLED) {   //override totally aileron crow if crow RC switch set to disabled
         weight_outer = 0;
     }
