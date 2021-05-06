@@ -1288,7 +1288,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Units: Hz
 	// @Range: 0 50
     // @User: Standard
-    AP_GROUPINFO("jSYSID_T_FADEIN", 35, ParametersG2, jsysid_t_fadein, 2),
+    AP_GROUPINFO("jSYSID_T_FADEIN", 35, ParametersG2, jsysid_t_fadein, 2),	
 
 
 #if OFFBOARD_GUIDED == ENABLED

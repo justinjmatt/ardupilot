@@ -12,7 +12,7 @@ void ModeTraining::update()
 	plane.t_rec       = 1000.0*plane.g2.jsysid_t_rec;
 	plane.f_min_hz    = plane.g2.jsysid_f_min_hz;
 	plane.f_max_hz    = plane.g2.jsysid_f_max_hz;
-	plane.t_fadein    = plane.g2.jsysid_t_fadein;
+	plane.t_fadein    = 1000.0*plane.g2.jsysid_t_fadein;
 	
 	if (plane.sweep_axis == 0) {
 		plane.do_sweep = false;
@@ -37,6 +37,8 @@ void ModeTraining::update()
 		plane.t0_sweep = millis();
 		plane.t_last = millis();
 		plane.theta_sweep = 0;
+		plane.sweep_noise = 0;
+		plane.t_noise = 0;
 	}
 	
 	plane.t_in_mode = millis() - plane.t0_sweep;
@@ -45,8 +47,7 @@ void ModeTraining::update()
 	plane.t_last = plane.t_current;
 
 	// Main sweep code
-	if (plane.t_in_mode < plane.t_rec && plane.do_sweep == true) {
-		
+	if (plane.t_in_mode < plane.t_rec && plane.do_sweep == true && plane.sweep_type == 1) {	
 		// Plane should be in manual control
 		plane.training_manual_roll = true;
 		plane.nav_roll_cd = 0;
@@ -63,15 +64,25 @@ void ModeTraining::update()
 		}
 		plane.omega_rps = (plane.f_min_hz + plane.k_sweep*(plane.f_max_hz - plane.f_min_hz))*2*3.14159;
 		plane.theta_sweep += plane.omega_rps*plane.sweep_time_step*0.001f; // rad
-		plane.u_sweep = 4500*plane.sweep_amp*sinf(plane.theta_sweep); // deci-pwm
+		// Add noise to sweep. Update at f_max_hz
+		if (plane.t_noise >= 1000.0/plane.f_max_hz) {
+			
+			plane.sweep_noise = 450.0*plane.sweep_amp*((get_random16()-32768.0)/32767.0);
+			plane.t_noise = 0;
+		}
+		else {
+			plane.t_noise += plane.sweep_time_step;
+		}
+		// Get sweep input
+		plane.u_sweep = 4500.0*plane.sweep_amp*sinf(plane.theta_sweep) + plane.sweep_noise; // deci-pwm
 		if (plane.t_in_mode < plane.t_fadein) {
 			plane.u_sweep = plane.u_sweep*plane.t_in_mode/plane.t_fadein;
 		}
-		if (plane.t_in_mode > plane.t_rec - plane.t_fadeout) {
+		else if (plane.t_in_mode > plane.t_rec - plane.t_fadeout) {
 			plane.u_sweep = plane.u_sweep*(plane.t_rec - plane.t_in_mode)/plane.t_fadeout;
 		}
 	}
-    else if (plane.sweep_type == 0) {
+	else if (plane.sweep_type == 0) {
 		// set up controls for manual sweep
 		plane.sweep_active = true;
 		plane.u_sweep = 0;
