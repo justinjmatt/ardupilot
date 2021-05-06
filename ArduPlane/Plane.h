@@ -245,6 +245,8 @@ private:
 	uint64_t t0_sweep;
 	uint64_t t_current;
 	uint64_t t_last;
+	float sweep_noise;
+	uint64_t t_noise;
 	
 	// Logging variables for stick input
 	float sweep_roll_input;

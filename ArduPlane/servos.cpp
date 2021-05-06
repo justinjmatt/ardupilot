@@ -391,21 +391,36 @@ void Plane::set_servos_manual_passthrough(void)
 			// do manual sweeps
 			if (plane.sweep_axis == 1) {
 				// do aileron sweep
-				plane.sweep_roll_input = plane.sweep_amp*channel_roll->get_control_in_zero_dz();
+				plane.sweep_roll_input = channel_roll->get_control_in_zero_dz();
+				if (plane.sweep_roll_input > 4000.0*plane.sweep_amp) {
+					plane.sweep_roll_input = 4000.0*plane.sweep_amp;
+				} else if (plane.sweep_roll_input < -4000.0*plane.sweep_amp) {
+					plane.sweep_roll_input = -4000.0*plane.sweep_amp;
+				}
 				SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, plane.sweep_roll_input);
 				SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
 				SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
 			}
 			else if (plane.sweep_axis == 2) {
 				// do elevator sweep
-				plane.sweep_pitch_input = plane.sweep_amp*channel_pitch->get_control_in_zero_dz();
+				plane.sweep_pitch_input = channel_pitch->get_control_in_zero_dz();
+				if (plane.sweep_pitch_input > 4000.0*plane.sweep_amp) {
+					plane.sweep_pitch_input = 4000.0*plane.sweep_amp;
+				} else if (plane.sweep_pitch_input < -4000.0*plane.sweep_amp) {
+					plane.sweep_pitch_input = -4000.0*plane.sweep_amp;
+				}
 				SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
 				SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, plane.sweep_pitch_input);
 				SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, channel_rudder->get_control_in_zero_dz());
 			}
 			else if (plane.sweep_axis == 3) {
 				// do rudder sweep
-				plane.sweep_yaw_input = plane.sweep_amp*channel_rudder->get_control_in_zero_dz();
+				plane.sweep_yaw_input = channel_rudder->get_control_in_zero_dz();
+				if (plane.sweep_yaw_input > 4000.0*plane.sweep_amp) {
+					plane.sweep_yaw_input = 4000.0*plane.sweep_amp;
+				} else if (plane.sweep_yaw_input < -4000.0*plane.sweep_amp) {
+					plane.sweep_yaw_input = -4000.0*plane.sweep_amp;
+				}
 				SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in_zero_dz());
 				SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in_zero_dz());
 				SRV_Channels::set_output_scaled(SRV_Channel::k_rudder, plane.sweep_yaw_input);
