@@ -37,8 +37,7 @@ void ModeTraining::update()
 		plane.t0_sweep = millis();
 		plane.t_last = millis();
 		plane.theta_sweep = 0;
-		plane.sweep_noise = 0;
-		plane.t_noise = 0;
+		plane.sweep_noise_y = 0;
 	}
 	
 	plane.t_in_mode = millis() - plane.t0_sweep;
@@ -64,17 +63,12 @@ void ModeTraining::update()
 		}
 		plane.omega_rps = (plane.f_min_hz + plane.k_sweep*(plane.f_max_hz - plane.f_min_hz))*2*3.14159;
 		plane.theta_sweep += plane.omega_rps*plane.sweep_time_step*0.001f; // rad
-		// Add noise to sweep. Update at f_max_hz
-		if (plane.t_noise >= 1000.0/plane.f_max_hz) {
-			
-			plane.sweep_noise = 450.0*plane.sweep_amp*((get_random16()-32768.0)/32767.0);
-			plane.t_noise = 0;
-		}
-		else {
-			plane.t_noise += plane.sweep_time_step;
-		}
+		// Add noise to sweep. Lowpass at 6.5 Hz (41 rps)
+		plane.sweep_noise_u = 450.0*plane.sweep_amp*((get_random16()-32768.0)/32767.0);
+		plane.alpha_LP = expf(-41*plane.sweep_time_step*0.001f);
+		plane.sweep_noise_y = plane.alpha_LP*plane.sweep_noise_y + (1-plane.alpha_LP)*plane.sweep_noise_u;
 		// Get sweep input
-		plane.u_sweep = 4500.0*plane.sweep_amp*sinf(plane.theta_sweep) + plane.sweep_noise; // deci-pwm
+		plane.u_sweep = 4500.0*plane.sweep_amp*sinf(plane.theta_sweep) + plane.sweep_noise_y; // deci-pwm
 		if (plane.t_in_mode < plane.t_fadein) {
 			plane.u_sweep = plane.u_sweep*plane.t_in_mode/plane.t_fadein;
 		}
