@@ -109,9 +109,16 @@ void Plane::stabilize_roll(float speed_scaler)
     if (control_mode == &mode_stabilize && channel_roll->get_control_in() != 0) {
         disable_integrator = true;
     }
-    SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, rollController.get_servo_out(nav_roll_cd - ahrs.roll_sensor, 
+	if (plane.sweep_active_BL && plane.sweep_axis == 1 && plane.sweep_type == 2) {
+		plane.jtemp_roll_controller = rollController.get_servo_out(nav_roll_cd - ahrs.roll_sensor,speed_scaler,disable_integrator);
+		plane.sweep_roll_input = plane.u_sweep + plane.jtemp_roll_controller;
+		SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, plane.sweep_roll_input);
+	}
+    else {
+		SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, rollController.get_servo_out(nav_roll_cd - ahrs.roll_sensor, 
                                                                                          speed_scaler, 
                                                                                          disable_integrator));
+	}
 }
 
 /*
@@ -138,10 +145,16 @@ void Plane::stabilize_pitch(float speed_scaler)
     if (!quadplane.in_transition() && !control_mode->is_vtol_mode() && channel_throttle->in_trim_dz() && !control_mode->does_auto_throttle() && flare_mode == FlareMode::ENABLED_PITCH_TARGET) {
        demanded_pitch = landing.get_pitch_cd();
    }
-
-    SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(demanded_pitch - ahrs.pitch_sensor, 
+    if (plane.sweep_active_BL && plane.sweep_axis == 2 && plane.sweep_type == 2) {
+		plane.jtemp_pitch_controller = pitchController.get_servo_out(demanded_pitch - ahrs.pitch_sensor, speed_scaler, disable_integrator);
+		plane.sweep_pitch_input = plane.u_sweep + plane.jtemp_pitch_controller;
+		SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, plane.sweep_pitch_input);
+	}
+	else {
+		SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(demanded_pitch - ahrs.pitch_sensor, 
                                                                                            speed_scaler, 
                                                                                            disable_integrator));
+	}
 }
 
 /*
@@ -281,7 +294,11 @@ void Plane::stabilize_training(float speed_scaler)
 {
     if (training_manual_roll) {
         SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, channel_roll->get_control_in());
-    } else {
+    } else if (plane.sweep_active && plane.sweep_axis == 5) {
+		// Modified 7/1/2021 - Justin Matt
+		// hold roll angle during pitch sweeps
+		stabilize_roll(speed_scaler);
+	} else {
         // calculate what is needed to hold
         stabilize_roll(speed_scaler);
         if ((nav_roll_cd > 0 && channel_roll->get_control_in() < SRV_Channels::get_output_scaled(SRV_Channel::k_aileron)) ||
@@ -293,7 +310,12 @@ void Plane::stabilize_training(float speed_scaler)
 
     if (training_manual_pitch) {
         SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, channel_pitch->get_control_in());
-    } else {
+    } else if ((plane.sweep_active) && (plane.sweep_axis == 4 || plane.sweep_axis == 6)) {
+		// Modified 7/1/2021 - Justin Matt
+		// hold pitch angle during roll or yaw sweeps
+		stabilize_pitch(speed_scaler);
+	} 
+	else {
         stabilize_pitch(speed_scaler);
         if ((nav_pitch_cd > 0 && channel_pitch->get_control_in() < SRV_Channels::get_output_scaled(SRV_Channel::k_elevator)) ||
             (nav_pitch_cd < 0 && channel_pitch->get_control_in() > SRV_Channels::get_output_scaled(SRV_Channel::k_elevator))) {
@@ -463,6 +485,12 @@ void Plane::stabilize()
             steerController.reset_I();            
         }
     }
+	AP::logger().Write("TEST", "TimeUS,roll_cont,pitch_cont,roll_comb,pitch_comb", "Qffff",
+                                        AP_HAL::micros64(),
+										plane.jtemp_roll_controller,
+										plane.jtemp_pitch_controller,
+										plane.sweep_roll_input,
+										plane.sweep_pitch_input);
 }
 
 

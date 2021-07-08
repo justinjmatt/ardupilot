@@ -217,7 +217,7 @@ private:
     bool training_manual_roll;  // user has manual roll control
     bool training_manual_pitch; // user has manual pitch control
 	
-	// Training mode modifications for system ID - Modifed 4/27/2021 - Justin Matt ////////
+	// Training mode modifications for system ID - Modified 4/27/2021 - Justin Matt ////////
 	// Get sweep parameters
 	int8_t sweep_axis;
 	int8_t sweep_type;
@@ -234,6 +234,7 @@ private:
 	bool do_sweep;
 	uint64_t t_start;
 	bool sweep_active;
+	bool sweep_active_BL;
 	uint64_t t_in_mode;
 	uint64_t t_sweep;
 	float k_sweep;
@@ -243,11 +244,15 @@ private:
 	uint64_t sweep_time_step;
 	float u_sweep;
 	uint64_t t0_sweep;
+	uint64_t t0_sweep_BL;
 	uint64_t t_current;
 	uint64_t t_last;
 	float sweep_noise_u;
 	float sweep_noise_y = 0;
 	float alpha_LP;
+	
+	float jtemp_roll_controller;
+	float jtemp_pitch_controller;
 	
 	// Logging variables for stick input
 	float sweep_roll_input;

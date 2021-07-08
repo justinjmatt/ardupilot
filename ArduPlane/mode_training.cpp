@@ -13,10 +13,17 @@ void ModeTraining::update()
 	plane.f_min_hz    = plane.g2.jsysid_f_min_hz;
 	plane.f_max_hz    = plane.g2.jsysid_f_max_hz;
 	plane.t_fadein    = 1000.0*plane.g2.jsysid_t_fadein;
+	float jrandom_number;
 	
-	if (plane.sweep_axis == 0) {
+	if (plane.sweep_axis != 1 && 
+		plane.sweep_axis != 2 && 
+		plane.sweep_axis != 3 && 
+		plane.sweep_axis != 4 && 
+		plane.sweep_axis != 5 &&
+		plane.sweep_axis != 6) {
 		plane.do_sweep = false;
-	} else if (plane.sweep_type == 0) {
+	} else if (plane.sweep_type != 0 &&
+			   plane.sweep_type != 1) {
 		plane.do_sweep = false;
 	} else {
 		plane.do_sweep = true; 
@@ -48,13 +55,26 @@ void ModeTraining::update()
 	// Main sweep code
 	if (plane.t_in_mode < plane.t_rec && plane.do_sweep == true && plane.sweep_type == 1) {
 		
-		// Plane should be in manual control
-		plane.training_manual_roll = true;
-		plane.nav_roll_cd = 0;
-		plane.training_manual_pitch = true;
-		plane.nav_pitch_cd = 0;
-
 		plane.sweep_active = true;
+		
+		// Add control to off-axis if desired
+		if (plane.sweep_axis == 4 || 
+			plane.sweep_axis == 6) {
+			// Add pitch control during roll or yaw sweep
+			plane.training_manual_pitch = false;
+			plane.training_manual_roll = true;
+			
+		} else if (plane.sweep_axis == 5) {
+			// Add roll control during pitch sweep
+			plane.training_manual_pitch = true;
+			plane.training_manual_roll = false;
+		} else {
+			plane.training_manual_roll = true;
+			plane.training_manual_pitch = true;
+		}
+		plane.nav_pitch_cd = 190; // cdeg, trim pitch = 1.9 deg
+		plane.nav_roll_cd = 0;
+		
 		if (plane.t_in_mode < plane.t_start) {
 			plane.t_sweep = 0;
 			plane.k_sweep = 0;
@@ -64,12 +84,20 @@ void ModeTraining::update()
 		}
 		plane.omega_rps = (plane.f_min_hz + plane.k_sweep*(plane.f_max_hz - plane.f_min_hz))*2*3.14159;
 		plane.theta_sweep += plane.omega_rps*plane.sweep_time_step*0.001f; // rad
-		// Add noise to sweep. Lowpass at 6.5 Hz (41 rps)
-		plane.sweep_noise_u = 450.0*plane.sweep_amp*((get_random16()-32768.0)/32767.0);
-		plane.alpha_LP = expf(-41*plane.sweep_time_step*0.001f);
+		// Add noise to sweep. Lowpass at 20 rps
+		jrandom_number = ((((unsigned)random()) % 2000000) - 1.0e6) / 1.0e6;
+		plane.sweep_noise_u = 1.5*2.0*450.0*plane.sweep_amp*jrandom_number;
+		plane.alpha_LP = expf(-20.0*plane.sweep_time_step*0.001f);
 		plane.sweep_noise_y = plane.alpha_LP*plane.sweep_noise_y + (1-plane.alpha_LP)*plane.sweep_noise_u;
 		// Get sweep input
-		plane.u_sweep = 4500.0*plane.sweep_amp*sinf(plane.theta_sweep) + plane.sweep_noise_y; // deci-pwm
+		if (plane.omega_rps < 4.5) {
+			plane.sweep_amp = plane.sweep_amp*2.0/3.0;
+		} else { 
+				if ((plane.omega_rps >= 4.5) && (plane.omega_rps < 5)) {
+				plane.sweep_amp = plane.sweep_amp*(2.0 + (plane.omega_rps - 4.5)/0.5)/3.0;
+				}
+		}
+		plane.u_sweep = 4500.0*plane.sweep_amp*sinf(plane.theta_sweep) + plane.sweep_noise_y; // units - notational centi-degrees
 		if (plane.t_in_mode < plane.t_fadein) {
 			plane.u_sweep = plane.u_sweep*plane.t_in_mode/plane.t_fadein;
 		}
@@ -77,7 +105,7 @@ void ModeTraining::update()
 			plane.u_sweep = plane.u_sweep*(plane.t_rec - plane.t_in_mode)/plane.t_fadeout;
 		}
 	}
-	else if (plane.sweep_type == 0) {
+	else if (plane.t_in_mode < plane.t_rec && plane.do_sweep == true && plane.sweep_type == 0) {
 		// set up controls for manual sweep
 		plane.sweep_active = true;
 		plane.u_sweep = 0;

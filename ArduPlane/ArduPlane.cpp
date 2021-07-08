@@ -449,6 +449,10 @@ void Plane::update_control_mode(void)
 		plane.t0_sweep = 0;
 		plane.sweep_active = false;
 	}
+	if (control_mode != &mode_fbwa) {
+		plane.t0_sweep_BL = 0;
+		plane.sweep_active_BL = false;
+	}
 ////////////////////////////////////////////////////////////////////////////////////////
 
     effective_mode->update();
