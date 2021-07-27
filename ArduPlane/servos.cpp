@@ -367,7 +367,9 @@ void Plane::set_servos_manual_passthrough(void)
 		if (plane.sweep_type == 1) {
 			// do automated sweeps
 			if (plane.sweep_axis == 1 || 
-				plane.sweep_axis == 4) {
+				plane.sweep_axis == 4 ||
+				plane.sweep_axis == 7 ||
+				plane.sweep_axis == 10) {
 				// do aileron sweep
 				plane.sweep_roll_input = plane.u_sweep + channel_roll->get_control_in_zero_dz();
 				SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, plane.sweep_roll_input);

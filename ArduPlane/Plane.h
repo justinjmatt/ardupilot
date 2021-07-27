@@ -258,6 +258,11 @@ private:
 	float sweep_roll_input;
 	float sweep_pitch_input;
 	float sweep_yaw_input;
+	
+	// bang bang controller variables
+	bool bangbang_pos_aileron;
+	bool bangbang_neg_aileron;
+	float bangbang_ail_time;
 	/////////////// End of Modifications /////////////////////////////////////////////
 
     /*

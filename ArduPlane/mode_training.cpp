@@ -20,7 +20,9 @@ void ModeTraining::update()
 		plane.sweep_axis != 3 && 
 		plane.sweep_axis != 4 && 
 		plane.sweep_axis != 5 &&
-		plane.sweep_axis != 6) {
+		plane.sweep_axis != 6 &&
+		plane.sweep_axis != 7 &&
+		plane.sweep_axis != 10) {
 		plane.do_sweep = false;
 	} else if (plane.sweep_type != 0 &&
 			   plane.sweep_type != 1) {
@@ -45,6 +47,9 @@ void ModeTraining::update()
 		plane.t_last = millis();
 		plane.theta_sweep = 0;
 		plane.sweep_noise_y = 0;
+		plane.bangbang_pos_aileron = false;
+		plane.bangbang_neg_aileron = false;
+		plane.bangbang_ail_time = -1;
 	}
 	
 	plane.t_in_mode = millis() - plane.t0_sweep;
@@ -59,7 +64,8 @@ void ModeTraining::update()
 		
 		// Add control to off-axis if desired
 		if (plane.sweep_axis == 4 || 
-			plane.sweep_axis == 6) {
+			plane.sweep_axis == 6 ||
+			plane.sweep_axis == 10) {
 			// Add pitch control during roll or yaw sweep
 			plane.training_manual_pitch = false;
 			plane.training_manual_roll = true;
@@ -90,14 +96,44 @@ void ModeTraining::update()
 		plane.alpha_LP = expf(-20.0*plane.sweep_time_step*0.001f);
 		plane.sweep_noise_y = plane.alpha_LP*plane.sweep_noise_y + (1-plane.alpha_LP)*plane.sweep_noise_u;
 		// Get sweep input
-		if (plane.omega_rps < 4.5) {
-			plane.sweep_amp = plane.sweep_amp*2.0/3.0;
-		} else { 
-				if ((plane.omega_rps >= 4.5) && (plane.omega_rps < 5)) {
-				plane.sweep_amp = plane.sweep_amp*(2.0 + (plane.omega_rps - 4.5)/0.5)/3.0;
-				}
+		// Add variable frequency
+		if (plane.sweep_axis == 1 || plane.sweep_axis == 4 {
+			// decrease magnitude at low frequencies for roll sweeps
+			if (plane.omega_rps < 4.5) {
+				plane.sweep_amp = plane.sweep_amp*2.0/3.0;
+			} else { 
+					if ((plane.omega_rps >= 4.5) && (plane.omega_rps < 5.0)) {
+					plane.sweep_amp = plane.sweep_amp*(2.0 + (plane.omega_rps - 4.5)/0.5)/3.0;
+					}
+			}
 		}
 		plane.u_sweep = 4500.0*plane.sweep_amp*sinf(plane.theta_sweep) + plane.sweep_noise_y; // units - notational centi-degrees
+		if (plane.sweep_axis == 7 || plane.sweep_axis == 10) {
+			// bang bang controller
+			float j_roll_rate = ahrs.get_gyro().x; // rad/s
+			float j_roll_angle = ahrs.roll_sensor; // cdeg
+			if (plane.bangbang_pos_aileron) {
+				if (plane.bangbang_ail_time < 300) {
+					plane.u_sweep += 200;
+				}
+			}
+					
+				
+			if (j_roll_rate > 0 && j_roll_angle > 1000) {
+				// add negative aileron
+				bangbang_neg_aileron = true;
+				bangbang_pos_aileron = false;
+				bangbang_ail_time = t_current;
+				
+			}
+			if (j_roll_rate < 0 && j_roll_angle < 1000) {
+				// add positive aileron
+				bangbang_pos_aileron = true;
+				bangbang_neg_aileron = false;
+				bangbang_ail_time = t_current;
+			}
+			
+		} 
 		if (plane.t_in_mode < plane.t_fadein) {
 			plane.u_sweep = plane.u_sweep*plane.t_in_mode/plane.t_fadein;
 		}
