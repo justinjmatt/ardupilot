@@ -50,23 +50,7 @@ void ModeFBWA::update()
 	// Main sweep code
 	if (plane.t_in_mode < plane.t_rec && plane.do_sweep == true && plane.sweep_type == 2) {
 		plane.sweep_active_BL = true;
-		if (plane.t_in_mode < plane.t_start) {
-			plane.t_sweep = 0;
-			plane.k_sweep = 0;
-		} else {
-			plane.t_sweep = plane.t_in_mode - plane.t_start;
-			plane.k_sweep = 0.0187*(expf(4.0*plane.t_sweep/plane.t_sweep_end)-1.0);
-		}
-		plane.omega_rps = (plane.f_min_hz + plane.k_sweep*(plane.f_max_hz - plane.f_min_hz))*2*3.14159;
-		plane.theta_sweep += plane.omega_rps*plane.sweep_time_step*0.001f; // rad
-		// Get sweep input
-		plane.u_sweep = 4500.0*plane.sweep_amp*sinf(plane.theta_sweep); // units - notational centi-degrees
-		if (plane.t_in_mode < plane.t_fadein) {
-			plane.u_sweep = plane.u_sweep*plane.t_in_mode/plane.t_fadein;
-		}
-		else if (plane.t_in_mode > plane.t_rec - plane.t_fadeout) {
-			plane.u_sweep = plane.u_sweep*(plane.t_rec - plane.t_in_mode)/plane.t_fadeout;
-		}
+		plane.BL_sweep();
 	}
 	else { // If sweep isn't active, behave normally. 
 	    plane.sweep_active_BL = false;
@@ -104,4 +88,23 @@ void ModeFBWA::update()
 			}
 		}
 	}
+}
+
+void Plane::BL_sweep(void) {
+		if (plane.t_in_mode < plane.t_start) {
+			plane.t_sweep = 0;
+			plane.k_sweep = 0;
+		} else {
+			plane.t_sweep = plane.t_in_mode - plane.t_start;
+			plane.k_sweep = 0.0187*(expf(4.0*plane.t_sweep/plane.t_sweep_end)-1.0);
+		}
+		plane.omega_rps = (plane.f_min_hz + plane.k_sweep*(plane.f_max_hz - plane.f_min_hz))*2*3.14159;
+		plane.theta_sweep += plane.omega_rps*plane.sweep_time_step*0.001f; // rad
+		// Get sweep input
+		plane.u_sweep = 4500.0*plane.sweep_amp*sinf(plane.theta_sweep); // units - notational centi-degrees
+		if (plane.t_in_mode < plane.t_fadein) {
+			plane.u_sweep = plane.u_sweep*plane.t_in_mode/plane.t_fadein;
+		} else if (plane.t_in_mode > plane.t_rec - plane.t_fadeout) {
+			plane.u_sweep = plane.u_sweep*(plane.t_rec - plane.t_in_mode)/plane.t_fadeout;
+		}
 }

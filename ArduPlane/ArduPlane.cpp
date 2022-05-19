@@ -448,6 +448,7 @@ void Plane::update_control_mode(void)
     if (control_mode != &mode_training) {
 		plane.t0_sweep = 0;
 		plane.sweep_active = false;
+		plane.override_sweep = false;
 	}
 	if (control_mode != &mode_fbwa) {
 		plane.t0_sweep_BL = 0;

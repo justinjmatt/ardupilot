@@ -313,6 +313,7 @@ public:
 
     // methods that affect movement of the vehicle in this mode
     void update() override;
+	
 };
 
 class ModeInitializing : public Mode

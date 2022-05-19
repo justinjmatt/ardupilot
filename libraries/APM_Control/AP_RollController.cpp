@@ -153,7 +153,8 @@ int32_t AP_RollController::_get_rate_out(float desired_rate, float scaler, bool 
     //
     // note that we run AC_PID in radians so that the normal scaling
     // range for IMAX in AC_PID applies (usually an IMAX value less than 1.0)
-    rate_pid.update_all(radians(desired_rate) * scaler * scaler, rate_x * scaler * scaler, limit_I);
+	
+	rate_pid.update_all(radians(desired_rate) * scaler * scaler, rate_x * scaler * scaler, limit_I);
 
     if (underspeed) {
         // when underspeed we lock the integrator
@@ -210,6 +211,18 @@ int32_t AP_RollController::get_rate_out(float desired_rate, float scaler)
     return _get_rate_out(desired_rate, scaler, false);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////// Modified 9/23/2021 - Justin Matt - new controller function /////////////////////
+int32_t AP_RollController::jget_control_out(int32_t angle_error, float kp, float kd)
+{
+	float rate = _ahrs.get_gyro().x; // radians
+	float angle_error_rad = angle_error*0.01*3.14159265/180.0; // convert from cdeg to rad
+	float PID_P = kp*angle_error_rad; // rad aileron
+	float PID_D = kd*rate; // rad aileron
+	float control = (PID_P - PID_D)*180.0/3.14159265/0.0032; // convert from physical rad to notational centi-degrees										
+	return constrain_int32(control, -4500, 4500);
+}
+
 /*
  Function returns an equivalent aileron deflection in centi-degrees in the range from -4500 to 4500
  A positive demand is up
@@ -225,7 +238,7 @@ int32_t AP_RollController::get_servo_out(int32_t angle_err, float scaler, bool d
         gains.tau.set(0.05f);
     }
 	
-    // Calculate the desired roll rate (deg/sec) from the angle error
+	// Calculate the desired roll rate (deg/sec) from the angle error
     angle_err_deg = angle_err * 0.01;
     float desired_rate = angle_err_deg/ gains.tau;
 
@@ -235,7 +248,7 @@ int32_t AP_RollController::get_servo_out(int32_t angle_err, float scaler, bool d
     } else if (gains.rmax_pos && desired_rate > gains.rmax_pos) {
         desired_rate = gains.rmax_pos;
     }
-
+	
     return _get_rate_out(desired_rate, scaler, disable_integrator);
 }
 

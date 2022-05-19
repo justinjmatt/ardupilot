@@ -18,6 +18,9 @@ public:
 
 	int32_t get_rate_out(float desired_rate, float scaler);
 	int32_t get_servo_out(int32_t angle_err, float scaler, bool disable_integrator);
+	/////// Modified 9/23/2021 - Justin Matt - add custom function for PD controller ///////////
+	int32_t jget_control_out(int32_t angle_er, float kp, float kd);
+	// return aileron in notation centi-degrees
 
 	void reset_I();
 

@@ -222,6 +222,8 @@ private:
 	int8_t sweep_axis;
 	int8_t sweep_type;
 	float  sweep_amp;
+	float  sweep_amp1;
+	float  sweep_amp2;
 	float  f_min_hz;
 	float  f_max_hz;
 	bool   f_const     = true;
@@ -229,6 +231,7 @@ private:
 	float  t_fadein    = (1/f_min_hz)*1000.0f;	 
 	float  t_fadeout   = 0; 			
 	bool   white_noise = true;
+	bool   override_sweep;
 	
 	// Declare other variables 
 	bool do_sweep;
@@ -250,19 +253,32 @@ private:
 	float sweep_noise_u;
 	float sweep_noise_y = 0;
 	float alpha_LP;
+	uint64_t t0_bangbang_shift;
+	bool shift_active;
+	uint64_t time_since_shift;
+	float shift;
 	
 	float jtemp_roll_controller;
 	float jtemp_pitch_controller;
+	
+	// custom controller booleans
+	bool custom_roll_controller;
+	bool custom_pitch_controller;
+	
 	
 	// Logging variables for stick input
 	float sweep_roll_input;
 	float sweep_pitch_input;
 	float sweep_yaw_input;
 	
-	// bang bang controller variables
-	bool bangbang_pos_aileron;
-	bool bangbang_neg_aileron;
-	float bangbang_ail_time;
+	float j_trim_pitch;
+	
+	// Function declarations
+	void frequency_sweep(void);
+	void auto_doublet(void);
+	void BL_sweep(void);
+	void bang_bang_ctrl(void);
+	
 	/////////////// End of Modifications /////////////////////////////////////////////
 
     /*

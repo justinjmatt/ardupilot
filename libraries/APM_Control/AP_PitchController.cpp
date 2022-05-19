@@ -269,6 +269,19 @@ float AP_PitchController::_get_coordination_rate_offset(float &aspeed, bool &inv
     return rate_offset;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////// Modified 9/23/2021 - Justin Matt - new PD controller function /////////////////////
+int32_t AP_PitchController::jget_control_out(int32_t angle_error, float kp, float kd)
+{
+	float rate = _ahrs.get_gyro().y; // radians
+	float angle_error_rad = angle_error*0.01*3.14159265/180.0; // convert from cdeg to rad
+	float PID_P = kp*angle_error_rad; // rad elevator
+	float PID_D = kd*rate; // rad elevator
+	float control = (PID_P - PID_D)*180.0/3.14159265/0.0032; // convert from rad (physical) to notational centi-degrees
+										
+	return constrain_int32(control, -4500, 4500);
+}
+
 // Function returns an equivalent elevator deflection in centi-degrees in the range from -4500 to 4500
 // A positive demand is up
 // Inputs are: 

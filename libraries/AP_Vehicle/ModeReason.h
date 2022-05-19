@@ -61,4 +61,6 @@ enum class ModeReason : uint8_t {
   MISSION_CMD,
   FRSKY_COMMAND,
   FENCE_RETURN_PREVIOUS_MODE,
+  // Added 10/20/2021 - mode reason for bailing out of system ID sweep
+  ABORT_SWEEP
 };

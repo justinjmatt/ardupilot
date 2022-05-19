@@ -584,6 +584,14 @@ public:
 	AP_Float   jsysid_f_max_hz;
 	AP_Int8    jsysid_t_rec;
 	AP_Float   jsysid_t_fadein;
+	AP_Float   jsysid_theta0;
+	AP_Float   jpitch_KP;
+	AP_Float   jpitch_KD;
+	AP_Float   jroll_KP;
+	AP_Float   jroll_KD;
+	AP_Float   jbang_roll_lim;
+	AP_Float   jbang_ptch_lim;
+	AP_Float   jbang_amp;
 };
 
 extern const AP_Param::Info var_info[];

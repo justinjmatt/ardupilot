@@ -1232,13 +1232,17 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("RTL_CLIMB_MIN", 27, ParametersG2, rtl_climb_min, 0),
 
+	///////////////////////////////////////////////////////////////////////
+	// Modified 4/22/2021 - Justin Matt - Added parameters for system ID //
+	///////////////////////////////////////////////////////////////////////
+	
     // @Param: jSYSID_AXIS
     // @DisplayName: System Identification Axis
     // @Description: Controls which axis is being excited. Zero disables the system ID code that replaced training mode.
     // @Range: 0 3
     // @Increment: 1
     // @User: Standard
-	// @Values: 0:Disabled, 1:Roll, 2:Pitch, 3:Yaw
+    // @Values: 0:Disabled, 1:Roll, 2:Pitch, 3:Yaw
     AP_GROUPINFO("jSYSID_AXIS", 29, ParametersG2, jsysid_axis, 0),
 
     // @Param: jSYSID_TYPE
@@ -1247,14 +1251,14 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Range: 0 1
     // @Increment: 1
     // @User: Standard
-	// @Values: 0:Manual, 1:Automated
+    // @Values: 0:Manual, 1:Automated
     AP_GROUPINFO("jSYSID_TYPE", 30, ParametersG2, jsysid_type, 1),
 	
     // @Param: jSYSID_AMP
     // @DisplayName: System Identification Sweep Amplitude
-    // @Description: Amplitude of the automated frequency sweeps or maximum amplitude of the RC stick input for manual sweeps. Defined as a percentage of the maximum servo throw.
+    // @Description: Amplitude of the automated frequency sweeps or maximum amplitude of the RC stick input for manual sweeps before 4.5 rad/s. Defined as a percentage of the maximum servo throw.
     // @Units: %
-	// @Range: 0 100
+    // @Range: 0 100
     // @User: Standard
     AP_GROUPINFO("jSYSID_AMP", 31, ParametersG2, jsysid_amp, 10),	
 	
@@ -1262,23 +1266,23 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @DisplayName: System Identification Record Time
     // @Description: Total length of frequency sweep.
     // @Units: s
-	// @Range: 0 255
+    // @Range: 0 255
     // @User: Standard
     AP_GROUPINFO("jSYSID_T_REC", 32, ParametersG2, jsysid_t_rec, 20),	
-	
+
     // @Param: jSYSID_F_MIN_HZ
     // @DisplayName: System Identification Minimum Frequency
     // @Description: Minimum frequency of frequency sweep.
     // @Units: Hz
-	// @Range: 0 50
+    // @Range: 0 50
     // @User: Standard
     AP_GROUPINFO("jSYSID_F_MIN_HZ", 33, ParametersG2, jsysid_f_min_hz, 0.5),	
-	
+
     // @Param: jSYSID_F_MAX_HZ
     // @DisplayName: System Identification Maximum Frequency
     // @Description: System Identification Maximum Frequency.
     // @Units: Hz
-	// @Range: 0 50
+    // @Range: 0 50
     // @User: Standard
     AP_GROUPINFO("jSYSID_F_MAX_HZ", 34, ParametersG2, jsysid_f_max_hz, 5),	
 
@@ -1286,10 +1290,66 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @DisplayName: System Identification Fade-in Time
     // @Description: Length of fade-in to maximum amplitude during frequency sweep.
     // @Units: Hz
-	// @Range: 0 50
+    // @Range: 0 50
     // @User: Standard
     AP_GROUPINFO("jSYSID_T_FADEIN", 35, ParametersG2, jsysid_t_fadein, 2),	
 
+    // @Param: jSYSID_Theta0
+    // @DisplayName: System Identification Sweep Trim Pitch
+    // @Description: Trim pitch angle to hold during roll sweeps if controller is active
+    // @Units: deg
+    // @Range: 0 100
+    // @User: Standard
+    AP_GROUPINFO("jSYSID_Theta0", 36, ParametersG2, jsysid_theta0, 3),
+
+    // @Param: jPITCH_KP
+    // @DisplayName: Pitch Loop Proportional Gain
+    // @Units: rad (elevator) / rad (pitch)
+    // @Range: -100 100
+    // @User: Standard
+    AP_GROUPINFO("jPITCH_KP", 37, ParametersG2, jpitch_KP, 0.576),	
+
+    // @Param: jPITCH_KD
+    // @DisplayName: Pitch Loop Derivative Gain
+    // @Units: rad (elevator) / rad (pitch)
+    // @Range: -100 100
+    // @User: Standard
+    AP_GROUPINFO("jPITCH_KD", 38, ParametersG2, jpitch_KD, 0.050),	
+
+    // @Param: jROLL_KP
+    // @DisplayName: Roll Loop Proportional Gain
+    // @Units: rad (elevator) / rad (pitch)
+    // @Range: -100 100
+    // @User: Standard
+    AP_GROUPINFO("jROLL_KP", 39, ParametersG2, jroll_KP, 0.320),	
+
+    // @Param: jROLL_KD
+    // @DisplayName: Roll Loop Proportional Gain
+    // @Units: rad (elevator) / rad (pitch)
+    // @Range: -100 100
+    // @User: Standard
+    AP_GROUPINFO("jROLL_KD", 40, ParametersG2, jroll_KD, 0.035),	
+
+    // @Param: jBANG_ROLL_LIM
+    // @DisplayName: Roll angle limit before bang-bang controller engages
+    // @Units: deg
+    // @Range: -90 90
+    // @User: Standard
+    AP_GROUPINFO("jBANG_ROLL_LIM", 41, ParametersG2, jbang_roll_lim, 15),
+
+    // @Param: jBANG_PTCH_LIM
+    // @DisplayName: Pitch angle limit before bang-bang controller engages
+    // @Units: deg
+    // @Range: -90 90
+    // @User: Standard
+    AP_GROUPINFO("jBANG_PTCH_LIM", 42, ParametersG2, jbang_ptch_lim, 15),	
+
+    // @Param: jBANG_AMP
+    // @DisplayName: Amplitude of bang-bang controller inputs as a percentage
+    // @Units: %
+    // @Range: 0 100
+    // @User: Standard
+    AP_GROUPINFO("jBANG_AMP", 43, ParametersG2, jbang_amp, 7),
 
 #if OFFBOARD_GUIDED == ENABLED
     // @Group: GUIDED_
