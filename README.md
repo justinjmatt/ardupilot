@@ -17,7 +17,7 @@ There are many files that were modified. The majority of files are located in th
 - **[ArduPlane/Log.cpp](https://github.com/justinjmatt/ardupilot/blob/master/ArduPlane/Log.cpp)**
   - A custom log message was added to this file to record the signals of the frequency sweep with higher priority. At the time of initial modification, the AETR variable was not saved by ArduPilot, and so a custom message was needed. This is likely not needed anymore. 
 - **[ArduPlane/Parameters.cpp](https://github.com/justinjmatt/ardupilot/blob/master/ArduPlane/Parameters.cpp)** and **[ArduPlane/Parameters.h](https://github.com/justinjmatt/ardupilot/blob/master/ArduPlane/Parameters.h)**
- - Custom parameters are defined here as part of the G2 class of parameters. These modifications follow the develop guide found [here](https://ardupilot.org/dev/docs/code-overview-adding-a-new-parameter.html). All custom parameters start with "j." The next section will detail all the parameters.
+  - Custom parameters are defined here as part of the G2 class of parameters. These modifications follow the develop guide found [here](https://ardupilot.org/dev/docs/code-overview-adding-a-new-parameter.html). All custom parameters start with "j." The next section will detail all the parameters.
 - **[ArduPlane/Plane.h](https://github.com/justinjmatt/ardupilot/blob/master/ArduPlane/Plane.h)**
   - This is the header file for the main Plane class, which is used throughout the code. New variables are defined here. 
 - **[ArduPlane/mode_fbwa.cpp](https://github.com/justinjmatt/ardupilot/blob/master/ArduPlane/mode_fbwa.cpp)**
